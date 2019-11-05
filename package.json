@@ -1,0 +1,16 @@
+{
+	"name": "scrape-hapoalim-txns",
+	"version": "1.0.0",
+	"description": "Scrape transaction data from the \"budget\" section of Bank Hapoalim website.",
+	"main": "index.js",
+	"dependencies": {
+		"csv-stringify": "^5.3.3",
+		"inquirer": "^7.0.0",
+		"node-fetch": "^2.6.0"
+	},
+	"scripts": {
+		"start": "node index.js"
+	},
+	"author": "Shalom Steinbach",
+	"license": "ISC"
+}
