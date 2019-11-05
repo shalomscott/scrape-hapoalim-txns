@@ -3,6 +3,9 @@
 	"version": "1.0.0",
 	"description": "Scrape transaction data from the \"budget\" section of Bank Hapoalim website.",
 	"main": "index.js",
+	"bin": {
+		"scrape-hapoalim-txns": "cli.sh"
+	},
 	"dependencies": {
 		"csv-stringify": "^5.3.3",
 		"inquirer": "^7.0.0",
