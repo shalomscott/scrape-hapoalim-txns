@@ -1,50 +1,10 @@
 'use strict';
 
-const fetch = require('node-fetch');
 const fs = require('fs');
 const inquirer = require('inquirer');
 const stringify = require('csv-stringify');
-const { formatDate, logAndRethrow, select } = require('./utils.js');
-
-function getCategories(smsession, period) {
-	return fetch(
-		`https://login.bankhapoalim.co.il/ssb/pfm/transactions/expenses?lang=he&requestedPeriod=${period}&view=categories`,
-		{
-			headers: {
-				Cookie: `SMSESSION=${smsession}`
-			}
-		}
-	)
-		.catch(logAndRethrow(`Error fetching categories for period: ${period}`))
-		.then(res => res.json())
-		.catch(logAndRethrow(`Error parsing categories response as JSON`))
-		.then(categories => categories.map(select('name', 'code')));
-}
-
-function getCategoryTxns(smsession, period, categoryCode) {
-	return fetch(
-		`https://login.bankhapoalim.co.il/ssb/pfm/transactions/expenses?categoryId=${categoryCode}&lang=he&requestedPeriod=${period}&view=details`,
-		{
-			headers: {
-				Cookie: `SMSESSION=${smsession}`
-			}
-		}
-	)
-		.catch(
-			logAndRethrow(`Error fetching txns for category code: ${categoryCode}`)
-		)
-		.then(res => res.json())
-		.catch(logAndRethrow(`Error parsing txns response as JSON`))
-		.then(txns =>
-			txns.map(
-				select(
-					'transactionDate',
-					'transactionActivityDescription',
-					'transactionSum'
-				)
-			)
-		);
-}
+const { getCategories, getCategoryTxns } = require('./requests.js');
+const { formatDate } = require('./utils.js');
 
 function formatTxn(txn, category) {
 	return {
@@ -70,26 +30,33 @@ inquirer
 		}
 	])
 	.then(({ smsession, period }) =>
+		// Fetch the categories in the given period
 		getCategories(smsession, period)
+			// For each category, fetch its transactions
 			.then(categories =>
 				Promise.all(
 					categories.map(category =>
 						getCategoryTxns(smsession, period, category.code).then(txns =>
+							// Format the transaction object
 							txns.map(txn => formatTxn(txn, category))
 						)
 					)
 				)
 			)
+			// Flatten the resulting array
 			.then(txnsByCategory => txnsByCategory.flat())
+			// Sort the transactions by date
 			.then(txns =>
 				txns.sort(({ date: date1 }, { date: date2 }) =>
 					date1.localeCompare(date2)
 				)
 			)
+			// Write CSV output to a file
 			.then(txns =>
 				stringify(txns, {
 					header: true
 				}).pipe(fs.createWriteStream(`bank-hapoalim-export-${period}.csv`))
 			)
+			// Catch any errors
 			.catch(error => console.error(error.message || error))
 	);
