@@ -3,6 +3,9 @@
 const fetch = require('node-fetch');
 const { logAndRethrow, select } = require('./utils.js');
 
+const BASE_URL =
+	'https://login.bankhapoalim.co.il/ServerServices/pfm/transactions/expenses';
+
 function getHeaders(smsession) {
 	return {
 		Cookie: `SMSESSION=${smsession}`
@@ -12,7 +15,7 @@ function getHeaders(smsession) {
 module.exports = {
 	getCategories: function(smsession, period) {
 		return fetch(
-			`https://login.bankhapoalim.co.il/ssb/pfm/transactions/expenses?lang=he&requestedPeriod=${period}&view=categories`,
+			`${BASE_URL}?lang=he&requestedPeriod=${period}&view=categories`,
 			{
 				headers: getHeaders(smsession)
 			}
@@ -25,7 +28,7 @@ module.exports = {
 
 	getCategoryTxns: function(smsession, period, categoryCode) {
 		return fetch(
-			`https://login.bankhapoalim.co.il/ssb/pfm/transactions/expenses?categoryId=${categoryCode}&lang=he&requestedPeriod=${period}&view=details`,
+			`${BASE_URL}?categoryId=${categoryCode}&lang=he&requestedPeriod=${period}&view=details`,
 			{
 				headers: getHeaders(smsession)
 			}
