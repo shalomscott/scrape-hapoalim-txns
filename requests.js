@@ -4,7 +4,7 @@ const fetch = require('node-fetch');
 const { logAndRethrow, select } = require('./utils.js');
 
 const BASE_URL =
-	'https://login.bankhapoalim.co.il/ServerServices/pfm/transactions/expenses';
+	'https://login.bankhapoalim.co.il/ssb/pfm/transactions/expenses';
 
 function getHeaders(smsession) {
 	return {
